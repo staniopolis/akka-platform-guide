@@ -1,16 +1,13 @@
 package shopping.cart;
 
 import akka.actor.typed.ActorSystem;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
 // tag::SendOrderProjection[]
 import akka.grpc.GrpcClientSettings;
 // end::SendOrderProjection[]
 import akka.management.cluster.bootstrap.ClusterBootstrap;
 import akka.management.javadsl.AkkaManagement;
+import com.typesafe.config.Config;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import shopping.cart.proto.ShoppingCartService;
@@ -22,53 +19,41 @@ import shopping.order.proto.ShoppingOrderServiceClient;
 
 // end::SendOrderProjection[]
 
-// tag::ItemPopularityProjection[]
-public class Main extends AbstractBehavior<Void> {
+public class Main {
 
-  public static void main(String[] args) throws Exception {
-    ActorSystem<Void> system = ActorSystem.create(Main.create(), "ShoppingCartService");
+  public static void main(String[] args) {
+    ActorSystem<Void> system = ActorSystem.create(Behaviors.empty(), "ShoppingCartService");
+    init(system, orderServiceClient(system));
   }
 
-  public static Behavior<Void> create() {
-    return Behaviors.setup(Main::new);
-  }
-
-  public Main(ActorContext<Void> context) {
-    super(context);
-
-    ActorSystem<?> system = context.getSystem();
-
+  public static void init(ActorSystem<Void> system, ShoppingOrderService orderService) {
     AkkaManagement.get(system).start();
     ClusterBootstrap.get(system).start();
 
     ShoppingCart.init(system);
 
     ApplicationContext springContext =
-        SpringIntegration.applicationContext(system.settings().config());
+            SpringIntegration.applicationContext(system.settings().config());
     JpaTransactionManager transactionManager = springContext.getBean(JpaTransactionManager.class);
 
     ItemPopularityRepository itemPopularityRepository =
-        springContext.getBean(ItemPopularityRepository.class);
+            springContext.getBean(ItemPopularityRepository.class);
 
     ItemPopularityProjection.init(system, transactionManager, itemPopularityRepository);
 
-    String grpcInterface =
-        system.settings().config().getString("shopping-cart-service.grpc.interface");
-    int grpcPort = system.settings().config().getInt("shopping-cart-service.grpc.port");
-
-    ShoppingCartService grpcService = new ShoppingCartServiceImpl(system, itemPopularityRepository);
-
-    ShoppingCartServer.start(grpcInterface, grpcPort, system, grpcService);
-
     PublishEventsProjection.init(system, transactionManager);
 
-    ShoppingOrderService orderService = orderServiceClient(system);
     SendOrderProjection.init(system, transactionManager, orderService);
+
+    Config config = system.settings().config();
+    String grpcInterface = config.getString("shopping-cart-service.grpc.interface");
+    int grpcPort = config.getInt("shopping-cart-service.grpc.port");
+    ShoppingCartService grpcService = new ShoppingCartServiceImpl(system, itemPopularityRepository);
+    ShoppingCartServer.start(grpcInterface, grpcPort, system, grpcService);
   }
 
   // tag::SendOrderProjection[]
-  // can be overridden in tests
-  protected ShoppingOrderService orderServiceClient(ActorSystem<?> system) {
+  static ShoppingOrderService orderServiceClient(ActorSystem<?> system) {
     GrpcClientSettings orderServiceClientSettings =
         GrpcClientSettings.connectToServiceAt(
                 system.settings().config().getString("shopping-order-service.host"),
@@ -80,8 +65,4 @@ public class Main extends AbstractBehavior<Void> {
   }
   // end::SendOrderProjection[]
 
-  @Override
-  public Receive<Void> createReceive() {
-    return newReceiveBuilder().build();
-  }
 }
