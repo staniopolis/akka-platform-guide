@@ -11,11 +11,14 @@ import com.typesafe.config.Config;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import shopping.cart.proto.ShoppingCartService;
+import shopping.cart.repository.HibernateJdbcSession;
 import shopping.cart.repository.ItemPopularityRepository;
 import shopping.cart.repository.SpringIntegration;
 // tag::SendOrderProjection[]
 import shopping.order.proto.ShoppingOrderService;
 import shopping.order.proto.ShoppingOrderServiceClient;
+
+import java.util.function.Supplier;
 
 // end::SendOrderProjection[]
 
@@ -35,15 +38,13 @@ public class Main {
     ApplicationContext springContext =
             SpringIntegration.applicationContext(system.settings().config());
     JpaTransactionManager transactionManager = springContext.getBean(JpaTransactionManager.class);
-
     ItemPopularityRepository itemPopularityRepository =
             springContext.getBean(ItemPopularityRepository.class);
+    Supplier<HibernateJdbcSession> sessionSupplier = () -> new HibernateJdbcSession(transactionManager);
 
-    ItemPopularityProjection.init(system, transactionManager, itemPopularityRepository);
-
-    PublishEventsProjection.init(system, transactionManager);
-
-    SendOrderProjection.init(system, transactionManager, orderService);
+    ItemPopularityProjection.init(system, sessionSupplier, itemPopularityRepository);
+    PublishEventsProjection.init(system, sessionSupplier);
+    SendOrderProjection.init(system, sessionSupplier, orderService);
 
     Config config = system.settings().config();
     String grpcInterface = config.getString("shopping-cart-service.grpc.interface");

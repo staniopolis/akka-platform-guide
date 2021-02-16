@@ -22,6 +22,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import shopping.cart.repository.HibernateJdbcSession;
 import shopping.cart.repository.ItemPopularityRepository;
 import shopping.cart.repository.SpringIntegration;
 
@@ -48,7 +49,7 @@ public class ItemPopularityIntegrationTest {
 
     ShoppingCart.init(system);
 
-    ItemPopularityProjection.init(system, transactionManager, itemPopularityRepository);
+    ItemPopularityProjection.init(system, () -> new HibernateJdbcSession(transactionManager), itemPopularityRepository);
 
     // form a single node cluster and make sure that completes before running the test
     Cluster node = Cluster.get(system);

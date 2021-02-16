@@ -13,7 +13,8 @@ import akka.projection.javadsl.AtLeastOnceProjection;
 import akka.projection.javadsl.SourceProvider;
 import akka.projection.jdbc.javadsl.JdbcProjection;
 import java.util.Optional;
-import org.springframework.orm.jpa.JpaTransactionManager;
+import java.util.function.Supplier;
+
 import shopping.cart.repository.HibernateJdbcSession;
 import shopping.order.proto.ShoppingOrderService;
 
@@ -22,17 +23,16 @@ public class SendOrderProjection {
   private SendOrderProjection() {}
 
   public static void init(
-      ActorSystem<?> system,
-      JpaTransactionManager transactionManager,
-      ShoppingOrderService orderService) {
+          ActorSystem<?> system,
+          Supplier<HibernateJdbcSession> sessionSupplier, ShoppingOrderService orderService) {
     ShardedDaemonProcess.get(system)
         .init(
             ProjectionBehavior.Command.class,
             "SendOrderProjection",
             ShoppingCart.TAGS.size(),
             index ->
-                ProjectionBehavior.create(
-                    createProjectionsFor(system, transactionManager, orderService, index)),
+                    ProjectionBehavior.create(
+                      createProjectionsFor(system, orderService, index, sessionSupplier)),
             ShardedDaemonProcessSettings.create(system),
             Optional.of(ProjectionBehavior.stopMessage()));
   }
@@ -40,9 +40,8 @@ public class SendOrderProjection {
   private static AtLeastOnceProjection<Offset, EventEnvelope<ShoppingCart.Event>>
       createProjectionsFor(
           ActorSystem<?> system,
-          JpaTransactionManager transactionManager,
           ShoppingOrderService orderService,
-          int index) {
+          int index, Supplier<HibernateJdbcSession> sessionSupplier) {
     String tag = ShoppingCart.TAGS.get(index);
     SourceProvider<Offset, EventEnvelope<ShoppingCart.Event>> sourceProvider =
         EventSourcedProvider.eventsByTag(system, JdbcReadJournal.Identifier(), tag);
@@ -50,7 +49,7 @@ public class SendOrderProjection {
     return JdbcProjection.atLeastOnceAsync(
         ProjectionId.of("SendOrderProjection", tag),
         sourceProvider,
-        () -> new HibernateJdbcSession(transactionManager),
+            sessionSupplier,
         () -> new SendOrderProjectionHandler(system, orderService),
         system);
   }
