@@ -22,9 +22,6 @@ public class Main {
   }
 
   public static void init(ActorSystem<Void> system) {
-    AkkaManagement.get(system).start();
-    ClusterBootstrap.get(system).start();
-
     ShoppingCartEventConsumer.init(system);
   }
 }

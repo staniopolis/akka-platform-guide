@@ -14,18 +14,6 @@ object Main {
   def main(args: Array[String]): Unit = {
     val system =
       ActorSystem[Nothing](Behaviors.empty, "ShoppingAnalyticsService")
-    try {
-      init(system)
-    } catch {
-      case NonFatal(e) =>
-        logger.error("Terminating due to initialization failure.", e)
-        system.terminate()
-    }
-  }
-
-  def init(system: ActorSystem[_]): Unit = {
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
   }
 
 }

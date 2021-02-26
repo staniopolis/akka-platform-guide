@@ -30,9 +30,6 @@ object Main {
     ScalikeJdbcSetup.init(system) // <1>
     // end::ItemPopularityProjection[]
 
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
-
     ShoppingCart.init(system)
 
     // tag::ItemPopularityProjection[]

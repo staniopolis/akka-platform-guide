@@ -24,9 +24,6 @@ public class Main {
   }
 
   public static void init(ActorSystem<Void> system) {
-    AkkaManagement.get(system).start();
-    ClusterBootstrap.get(system).start();
-
     // tag::ShoppingCart[]
     ShoppingCart.init(system);
     // end::ShoppingCart[]

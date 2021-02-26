@@ -31,9 +31,6 @@ object Main {
   }
 
   def init(system: ActorSystem[_], orderService: ShoppingOrderService): Unit = {
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
-
     ShoppingCart.init(system)
 
     // tag::ItemPopularityProjection[]

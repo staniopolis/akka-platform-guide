@@ -24,9 +24,6 @@ public class Main {
   }
 
   public static void init(ActorSystem<Void> system) {
-    AkkaManagement.get(system).start();
-    ClusterBootstrap.get(system).start();
-
     Config config = system.settings().config();
     String grpcInterface = config.getString("shopping-order-service.grpc.interface");
     int grpcPort = config.getInt("shopping-order-service.grpc.port");

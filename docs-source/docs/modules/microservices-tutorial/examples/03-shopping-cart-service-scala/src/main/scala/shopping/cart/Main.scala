@@ -24,9 +24,6 @@ object Main {
   }
 
   def init(system: ActorSystem[_]): Unit = {
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
-
     ShoppingCart.init(system)
 
     val grpcInterface =

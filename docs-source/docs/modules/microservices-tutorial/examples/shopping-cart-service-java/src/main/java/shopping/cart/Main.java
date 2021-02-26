@@ -37,9 +37,6 @@ public class Main {
 
   public static void init(ActorSystem<Void> system, ShoppingOrderService orderService) {
     // end::SendOrderProjection[]
-    AkkaManagement.get(system).start();
-    ClusterBootstrap.get(system).start();
-
     ShoppingCart.init(system);
 
     ApplicationContext springContext = SpringIntegration.applicationContext(system);

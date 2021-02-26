@@ -28,9 +28,6 @@ object Main {
   def init(system: ActorSystem[_]): Unit = {
     ScalikeJdbcSetup.init(system)
 
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
-
     ShoppingCart.init(system)
 
     val itemPopularityRepository = new ItemPopularityRepositoryImpl()

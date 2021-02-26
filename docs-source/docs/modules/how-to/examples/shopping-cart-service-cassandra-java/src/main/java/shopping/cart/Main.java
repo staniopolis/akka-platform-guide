@@ -29,9 +29,6 @@ public class Main {
   }
 
   public static void init(ActorSystem<Void> system, ShoppingOrderService orderService) {
-    AkkaManagement.get(system).start();
-    ClusterBootstrap.get(system).start();
-
     ShoppingCart.init(system);
 
     // tag::ItemPopularityProjection[]
