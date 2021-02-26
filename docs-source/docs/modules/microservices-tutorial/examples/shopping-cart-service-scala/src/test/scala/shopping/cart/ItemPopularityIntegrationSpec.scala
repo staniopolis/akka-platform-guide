@@ -53,7 +53,7 @@ class ItemPopularityIntegrationSpec
 
   "Item popularity projection" should {
     "init and join Cluster" in {
-      Cluster(system).manager ! Join(Cluster(system).selfMember.address)
+//      Cluster(system).manager ! Join(Cluster(system).selfMember.address)
 
       // let the node join and become Up
       eventually {
