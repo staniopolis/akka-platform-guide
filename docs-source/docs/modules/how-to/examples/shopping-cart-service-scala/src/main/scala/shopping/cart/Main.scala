@@ -13,18 +13,12 @@ object Main {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem[Nothing](Behaviors.empty, "ShoppingCartService")
     try {
-      init(system)
+      AkkaManagement(system).start()
     } catch {
       case NonFatal(e) =>
         logger.error("Terminating due to initialization failure.", e)
         system.terminate()
     }
-  }
-
-  def init(system: ActorSystem[_]): Unit = {
-    // tag::start-akka-management[]
-    AkkaManagement(system).start()
-    // end::start-akka-management[]
   }
 
 }

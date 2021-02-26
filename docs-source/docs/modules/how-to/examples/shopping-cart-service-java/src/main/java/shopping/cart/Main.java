@@ -13,16 +13,11 @@ public class Main {
   public static void main(String[] args) {
     ActorSystem<Void> system = ActorSystem.create(Behaviors.empty(), "ShoppingCartService");
     try {
-      init(system);
+      AkkaManagement.get(system).start();
     } catch (Exception e) {
       logger.error("Terminating due to initialization failure.", e);
       system.terminate();
     }
   }
 
-  public static void init(ActorSystem<Void> system) {
-    // tag::start-akka-management[]
-    AkkaManagement.get(system).start();
-    // tag::start-akka-management[]
-  }
 }

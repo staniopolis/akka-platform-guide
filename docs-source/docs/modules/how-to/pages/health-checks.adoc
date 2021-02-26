@@ -31,19 +31,25 @@ Upon start Akka Management creates an HTTP endpoint that allows insight into the
 .src/main/resources/application.conf
 [source,hocon]
 ----
+akka.extensions += "akka.management.cluster.bootstrap.ClusterBootstrap" # <1>
 akka.management {
-  http {
+  http { # <2>
     hostname = "127.0.0.1"
     port = 8558
   }
 }
 ----
 
-The management endpoint starts on the configured interface and port.
+<1> Initialization of Cluster Bootstrap that is used for forming the Akka Cluster. This extension, in turn, also start the Akka Management extension.
+<2> Set up the interface and port for Akka Management's HTTP server.
 
-[source,scala,indent=0]
+If you want to start the Akka Management extension without bootstrapping a cluster, you need to start the Akka
+Management extension programmatically:
+
+.src/main/scala/shopping/cart/Main.scala
+[source,scala]
 ----
-include::example$shopping-cart-service-scala/src/main/scala/shopping/cart/Main.scala[tag=start-akka-management]
+AkkaManagement(system).start()
 ----
 
 We consider our service ready for requests when it has joined the Akka Cluster and the database can be reached. Akka Management's "cluster HTTP" module automatically enables a check for cluster membership.

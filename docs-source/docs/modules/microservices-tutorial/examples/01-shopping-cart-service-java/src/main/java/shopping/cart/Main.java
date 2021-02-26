@@ -24,13 +24,10 @@ public class Main {
   }
 
   public static void init(ActorSystem<Void> system) {
-    AkkaManagement.get(system).start(); // <2>
-    ClusterBootstrap.get(system).start();
-
     Config config = system.settings().config();
     String grpcInterface = config.getString("shopping-cart-service.grpc.interface");
     int grpcPort = config.getInt("shopping-cart-service.grpc.port");
     ShoppingCartService grpcService = new ShoppingCartServiceImpl();
-    ShoppingCartServer.start(grpcInterface, grpcPort, system, grpcService); // <3>
+    ShoppingCartServer.start(grpcInterface, grpcPort, system, grpcService); // <2>
   }
 }

@@ -24,7 +24,7 @@ object Main {
   }
 
   def init(system: ActorSystem[_]): Unit = {
-    AkkaManagement(system).start() // <2>
+    AkkaManagement(system).start()
     ClusterBootstrap(system).start()
 
     val grpcInterface =
@@ -37,7 +37,7 @@ object Main {
       grpcPort,
       system,
       grpcService
-    ) // <3>
+    ) // <2>
   }
 
 }
