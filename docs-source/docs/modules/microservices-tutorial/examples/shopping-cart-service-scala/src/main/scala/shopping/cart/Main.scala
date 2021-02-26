@@ -1,16 +1,16 @@
 package shopping.cart
 
-import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.ActorSystem
-import akka.management.cluster.bootstrap.ClusterBootstrap
-import akka.management.scaladsl.AkkaManagement
-import org.slf4j.LoggerFactory
 import scala.util.control.NonFatal
+
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import org.slf4j.LoggerFactory
 import shopping.cart.repository.ItemPopularityRepositoryImpl
 import shopping.cart.repository.ScalikeJdbcSetup
 // tag::SendOrderProjection[]
-import shopping.order.proto.{ ShoppingOrderService, ShoppingOrderServiceClient }
 import akka.grpc.GrpcClientSettings
+import shopping.order.proto.ShoppingOrderService
+import shopping.order.proto.ShoppingOrderServiceClient
 
 object Main {
 
@@ -32,9 +32,6 @@ object Main {
   def init(system: ActorSystem[_], orderService: ShoppingOrderService): Unit = {
     // end::SendOrderProjection[]
     ScalikeJdbcSetup.init(system)
-
-    AkkaManagement(system).start()
-    ClusterBootstrap(system).start()
 
     ShoppingCart.init(system)
 
