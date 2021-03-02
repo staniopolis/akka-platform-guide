@@ -66,6 +66,6 @@ message GetItemPopularityRequest {
 
 message GetItemPopularityResponse {
     string itemId = 1;
-    int64 popularityCount = 2;
+    int64 count = 2;
 }
 // end::GetItemPopularity[]
